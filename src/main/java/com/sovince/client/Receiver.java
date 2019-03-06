@@ -3,6 +3,8 @@ package com.sovince.client;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 
 /**
  * Created by vince
@@ -26,7 +28,13 @@ public class Receiver extends Thread {
                 System.out.println(msg);
             }
 
-        } catch (IOException e) {
+            dataInputStream.close();
+
+        }
+        catch (SocketException e){
+            System.out.println("Receiver 退出");
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }

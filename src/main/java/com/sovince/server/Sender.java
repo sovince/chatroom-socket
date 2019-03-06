@@ -3,6 +3,9 @@ package com.sovince.server;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -24,15 +27,34 @@ public class Sender {
                         addr = map.get("addr");
                         msg = map.get("msg");
 
-                        for (Socket socket:Server.socketList){
-                            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                            dataOutputStream.writeUTF(addr+":"+msg);
-                            System.out.println("消息已广播:"+msg);
+                        //System.out.println(Server.socketList.size());
+                        Iterator<Socket> iterator = Server.socketList.iterator();
+                        while (iterator.hasNext()){
+                            Socket socket = iterator.next();
+                            try {
+                                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                                dataOutputStream.writeUTF(addr+":"+msg);
+                            }catch (SocketException s){
+                                System.out.println("SocketException!");
+//                                dataOutputStream.close();
+                                socket.close();
+                                iterator.remove();
+                            }
                         }
+                        System.out.println("消息已广播:"+msg+"用户数:"+Server.socketList.size());
+
                     }
                 }
-            }catch (IOException e){
+            }
+            catch (IOException e){
                 e.printStackTrace();
             }
+    }
+
+    public static void offerToQueue(String addr,String msg){
+        Map<String, String> map= new HashMap<>();
+        map.put("addr",addr);
+        map.put("msg",msg);
+        Server.msgQueue.offer(map);
     }
 }

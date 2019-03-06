@@ -1,10 +1,8 @@
 package com.sovince.server;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.SocketAddress;
 
 /**
  * Created by vince
@@ -22,26 +20,36 @@ public class Receiver extends Thread {
     @Override
     public void run() {
         try{
-            InetAddress inetAddress = socket.getInetAddress();
-            String addr = inetAddress.getHostAddress();
+            SocketAddress socketAddress = socket.getRemoteSocketAddress();
+            String addr = socketAddress.toString();
             //BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             String msg;
-            while (!(msg=dataInputStream.readUTF()).isEmpty()){//
+
+            Sender.offerToQueue("系统","新用户连接:"+addr);
+//            Sender.offerToQueue("系统","当前用户数:"+Server.socketList.size());
+            Sender.broadcast();
+
+            while (true){
+                msg = dataInputStream.readUTF();
                 System.out.println(addr+":"+msg);
-                offerToQueue(addr,msg);
+
+                if(msg.equals("quit")){
+                    Sender.offerToQueue(addr,msg);
+                    Sender.offerToQueue(addr,"用户退出");
+                    Sender.broadcast();
+                    dataInputStream.close();
+                    break;
+                }
+                Sender.offerToQueue(addr,msg);
                 Sender.broadcast();
             }
+            dataInputStream.close();
+            socket.close();
         }
         catch (IOException e){
             //e.printStackTrace();
         }
     }
 
-    private void offerToQueue(String addr,String msg){
-        Map<String, String> map= new HashMap<>();
-        map.put("addr",addr);
-        map.put("msg",msg);
-        Server.msgQueue.offer(map);
-    }
 }

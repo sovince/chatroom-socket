@@ -27,8 +27,12 @@ public class Speaker{
                 msg = bufferedReader.readLine();
                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataOutputStream.writeUTF(msg);
-                if(msg.equals("quit")) break;
+                if(msg.equals("quit")){
+                    dataOutputStream.close();
+                    break;
+                }
             }
+            bufferedReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
