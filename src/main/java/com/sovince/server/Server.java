@@ -28,6 +28,7 @@ public class Server {
     }
 
     public void start() throws IOException{
+        System.out.println("服务端已启动，等待连接……");
         while (true){
             Socket client = serverSocket.accept();
             socketList.add(client);//
