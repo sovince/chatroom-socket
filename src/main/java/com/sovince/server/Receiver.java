@@ -1,6 +1,7 @@
 package com.sovince.server;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 
@@ -13,8 +14,18 @@ import java.net.SocketAddress;
 public class Receiver extends Thread {
     private Socket socket;
 
-    public Receiver(Socket socket){
-        this.socket = socket;
+
+    public Receiver() {
+    }
+
+    public void waitForClient(ServerSocket serverSocket){
+        try {
+            Socket socket = serverSocket.accept();
+            this.socket = socket;
+            Server.socketList.add(socket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

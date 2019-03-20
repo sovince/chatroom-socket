@@ -14,7 +14,7 @@ import java.util.*;
 public class Server {
     private ServerSocket serverSocket;//服务端
     public static List<Socket> socketList;//客户端集合
-    public static Queue<Map<String,String>> msgQueue;//消息队列
+    public static Queue<Map<String,String>> msgQueue;//模拟消息队列 但没有阻塞方法 只能依托inputstream.read()来阻塞
 
     public Server(int port){
         try {
@@ -27,17 +27,16 @@ public class Server {
 
     }
 
-    public void start() throws IOException{
+    public void start(){
         System.out.println("服务端已启动，等待连接……");
         while (true){
-            Socket client = serverSocket.accept();
-            socketList.add(client);//
-            Receiver receiver = new Receiver(client);
+            Receiver receiver = new Receiver();
+            receiver.waitForClient(serverSocket);
             receiver.start();
         }
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) {
         new Server(7777).start();
     }
 

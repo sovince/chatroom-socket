@@ -35,10 +35,16 @@ public class Sender {
                                 DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                                 dataOutputStream.writeUTF(addr+":"+msg);
                             }catch (SocketException s){
-                                System.out.println("SocketException!");
+                                synchronized (Server.socketList){
+                                    if (Server.socketList.contains(socket)){
+                                        System.out.println("SocketException!");
 //                                dataOutputStream.close();
-                                socket.close();
-                                iterator.remove();
+                                        socket.close();
+                                        iterator.remove();//移除出现异常的socket
+                                        System.out.println("移除了出现异常的socket");
+                                    }
+                                }
+
                             }
                         }
                         System.out.println("消息已广播:"+msg+"用户数:"+Server.socketList.size());
